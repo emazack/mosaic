@@ -1,103 +1,97 @@
-const categorizeSimilarTransactions = (transactions) => {
+const mainContainer = document.querySelector(".cards-container");
 
-  const withCategoryList = transactions.filter(transaction => transaction.category);
-  const withoutCategoryList = transactions.filter(transaction => !(transaction.category));
+// Source code: https://www.geeksforgeeks.org/how-to-shuffle-an-array-using-javascript/
+const shuffleArray = (array) => {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }  
+  return array;
+}
 
-  const setCategory = (compareAmount, transactionsList, cutOff) => {
-    let difference = cutOff;
-    let result = "f"; 
-    transactionsList.forEach(element => {
-      console.log(compareAmount);
-      if ( Math.abs(compareAmount - element.amount) < difference ) {
-        difference = Math.abs(compareAmount - element.amount);
-        result = element.category;
-      }
-    });
-    return result;
+const generateCards = (container, cards) => {
+  for (let index = 0; index < cards.length; index++) {
+    let color = cards[index];
+    let newCard = document.createElement("div");
+    newCard.className = "card hidden";
+    newCard.setAttribute("data-color", color);
+    newCard.innerHTML = 
+    `
+    <div class="front" style="background-color: ${color};"></div>
+    <div class="back"></div>
+    `
+    container.appendChild(newCard);
   }
+}
 
-  withoutCategoryList.forEach(nocatTransaction => {
-    const sameTargetList = withCategoryList.filter(catTransaction => (nocatTransaction.targetAccount === catTransaction.targetAccount));
-    let category = setCategory(nocatTransaction.amount, sameTargetList, 1000);
-    transactions.forEach(transaction => {
-      if (transaction.id === nocatTransaction.id && category) {        
-        nocatTransaction["category"] = category;
-      }
-    });
+const resetCards = (cards) => {
+  cards.forEach(card => {
+    if (card.classList.contains('selected')) {
+      card.classList.remove('selected');
+      card.classList.add('hidden');
+    }
   });
+}
 
-  return transactions;
-};
+const setScore = (scoredColor, cards) => {
+  cards.forEach(card => {
+    if (card.getAttribute("data-color") === scoredColor) {
+      card.classList.remove("hidden");
+      card.classList.remove("selected");
+      card.classList.add("scored");
+    }
+  });
+}
+
+const clickingCards = () => {
+  const cardsList = document.querySelectorAll(".card");
+  const overlay = document.querySelector(".overlay");
+  var cardsSelected = [];
+  
+  cardsList.forEach(card => {
+    card.addEventListener("click", () => {
+      if ( !(card.classList.contains('scored')) ) {
+        card.classList.toggle("hidden");
+        card.classList.toggle("selected");
+        cardsSelected = document.querySelectorAll(".card.selected");
+        if (cardsSelected.length === 2) {
+          if (cardsSelected[0].getAttribute("data-color") === cardsSelected[1].getAttribute("data-color")) {
+            setScore(cardsSelected[0].getAttribute("data-color"), cardsList);
+            cardsSelected = [];
+          } else {
+            overlay.style.zIndex = 3;
+            setTimeout(() => {              
+             resetCards(cardsList);
+             overlay.style.zIndex = -1;
+            }, 1000);
+            cardsSelected = [];
+          }
+        }
+      }
+    })
+  });
+  
+}
+
+const initGame = (quantity) => {
+  if (quantity % 2 === 0) {
+    const colors = ["green", "red", "black", "grey", "pink", "blue", "orange", "purple", "yellow", "cyan"];
+    const picks = [];
+    for (let index = 0; index < quantity; index++) {
+      var numberPick = Math.floor(Math.random() * colors.length);
+      picks.push(colors[numberPick]);
+      picks.push(colors[numberPick]);
+      colors.splice(numberPick, 1);
+    }
+    shuffleArray(picks);
+    generateCards(mainContainer, picks);
+    clickingCards();
+  } else {
+    alert("You need an even number of cards less then 10 to play");
+  }
+}
 
 
-
-
-categorizeSimilarTransactions([
-  {
-    id: 'a001bb66-6f4c-48bf-8ae0-f73453aa8dd5',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -620,
-    time: '2021-04-10T10:30:00Z',
-  },
-  {
-    id: 'bfd6a11a-2099-4b69-a7bb-572d8436cf73',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -350,
-    category: 'eating_out',
-    time: '2021-03-12T12:34:00Z',
-  },
-  {
-    id: 'a9177ced-1c5f-432c-bb7d-867589a9d4b8',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -450,
-    category: 'travel',
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a9177ced-1c5f-432c-bb7d-867589a9d4b8',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -550,
-    category: 'friends',
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a8170ced-1c5f-432c-bb23d-867589a9d4b8',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -1290,
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a9970ced-1c5f-432c-bb25d-867589a9d4b9',
-    sourceAccount: 'my_account',
-    targetAccount: 'airport',
-    amount: -12290,
-    category: 'travel',
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a2170ced-1c5f-432c-bb25d-867589a9d4b9',
-    sourceAccount: 'my_account',
-    targetAccount: 'airport',
-    amount: -11999,
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a2170ced-1c5f-432c-bb25d-867589a9d4b9',
-    sourceAccount: 'my_account',
-    targetAccount: 'airport',
-    amount: -10290,
-    time: '2021-04-12T08:20:00Z',
-  },
-  {
-    id: 'a2170ced-1c5f-432c-bb25d-867589a9d4b9',
-    sourceAccount: 'my_account',
-    targetAccount: 'coffee_shop',
-    amount: -990,
-    time: '2021-04-12T08:20:00Z',
-  },
-])
+initGame(8);
