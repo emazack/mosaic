@@ -72,12 +72,11 @@ const clickingCards = () => {
       }
     })
   });
-  
 }
 
 const initGame = (quantity) => {
-  if (quantity % 2 === 0) {
-    const colors = ["green", "red", "black", "grey", "pink", "blue", "orange", "purple", "yellow", "cyan"];
+  const colors = ["green", "red", "black", "grey", "pink", "blue", "orange", "purple", "yellow", "cyan"];
+  if ((quantity % 2 === 0) && (quantity <= colors.length)) {
     const picks = [];
     for (let index = 0; index < quantity; index++) {
       var numberPick = Math.floor(Math.random() * colors.length);
@@ -89,9 +88,9 @@ const initGame = (quantity) => {
     generateCards(mainContainer, picks);
     clickingCards();
   } else {
-    alert("You need an even number of cards less then 10 to play");
+    alert(`You need an even number and maximum ${colors.length} cards to play`);
   }
 }
 
-
+// Start game with 8 cards
 initGame(8);
